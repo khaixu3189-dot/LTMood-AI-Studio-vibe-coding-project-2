@@ -70,7 +70,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
           id: Math.random().toString(36).substr(2, 9),
           data,
           mimeType: file.type
-        }].slice(0, 3)); // Max 3 refs
+        }].slice(0, 3));
       };
       reader.readAsDataURL(file);
     });
@@ -86,7 +86,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
     
     setIsGenerating(true);
     setErrorState(false);
-    setStep(6); // Step 6 is results/generating
+    setStep(7); // 生成结果页移至 Step 7
     try {
       const images = await generateStationery(
         textToUse,
@@ -104,8 +104,8 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
   };
 
   const tryExample = () => {
-    const exampleText = "My dearest friend, just a small note to say I am thinking of you. The weather here is turning cool, and the leaves are beginning to dance in the wind. I hope you are well.";
-    const exampleMood = "Warm vintage paper, light coffee stains, delicate autumn leaf illustrations in the corners.";
+    const exampleText = "My dearest friend, just a small note to say I am thinking of you. The weather here is turning cool, and the leaves are beginning to dance in the wind.";
+    const exampleMood = "Warm vintage paper, light coffee stains, delicate autumn leaf illustrations.";
     setTemplate('Letter');
     setTranscription(exampleText);
     setMoodPrompt(exampleMood);
@@ -127,25 +127,27 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
     onSave(newEntry);
   };
 
+  // 增加步骤列表
   const stepsList = [
     { label: 'Template' },
     { label: 'Style' },
-    { label: 'Words' },
+    { label: 'Speak' },
+    { label: 'Refine' },
     { label: 'Mood' },
-    { label: 'Final Touches' },
-    { label: 'Creation' }
+    { label: 'Details' },
+    { label: 'Magic' }
   ];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] py-8">
       {/* Visual Progress Header */}
-      <div className="w-full max-w-2xl mb-12 flex justify-between items-center px-4">
+      <div className="w-full max-w-3xl mb-12 flex justify-between items-center px-4">
         {stepsList.map((s, i) => (
           <div key={i} className="flex flex-col items-center flex-1 relative">
             <div className={`w-3 h-3 rounded-full transition-all duration-700 ${step > i ? 'bg-[#9d8189]' : 'bg-[#e8dfd8]'}`}>
               {step === i + 1 && <div className="absolute inset-0 w-3 h-3 bg-[#9d8189] rounded-full animate-ping" />}
             </div>
-            <span className={`mt-3 text-[10px] uppercase tracking-widest font-bold transition-colors duration-500 ${step === i + 1 ? 'text-[#9d8189]' : 'text-[#8d7d6f] opacity-40'}`}>
+            <span className={`mt-3 text-[9px] uppercase tracking-widest font-bold transition-colors duration-500 ${step === i + 1 ? 'text-[#9d8189]' : 'text-[#8d7d6f] opacity-40'}`}>
               {s.label}
             </span>
             {i < stepsList.length - 1 && (
@@ -158,7 +160,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
       <div className="w-full max-w-4xl px-4 relative">
         <div className="paper-sheet rounded-xl overflow-hidden flex flex-col min-h-[580px] animate-fade-in relative z-10">
           
-          <div className="flex-1 p-10 md:p-20 flex flex-col items-center justify-center text-center">
+          <div className="flex-1 p-10 md:p-16 flex flex-col items-center justify-center text-center">
             
             {step === 1 && (
               <div className="w-full max-w-md space-y-12 animate-fade-in">
@@ -183,12 +185,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                   ))}
                 </div>
                 <div className="pt-6 border-t border-[#f0e4d7]">
-                  <button 
-                    onClick={tryExample}
-                    className="text-[#9d8189] hover:text-[#5e503f] transition-colors italic text-sm underline underline-offset-4"
-                  >
-                    Generate a sample letter
-                  </button>
+                  <button onClick={tryExample} className="text-[#9d8189] hover:text-[#5e503f] transition-colors italic text-sm underline underline-offset-4">Generate a sample letter</button>
                 </div>
               </div>
             )}
@@ -205,7 +202,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                       key={p.id}
                       onClick={() => { setSelectedProfileId(p.id); setStep(3); }}
                       className={`p-6 rounded-2xl border transition-all text-left flex items-center justify-between
-                        ${selectedProfileId === p.id ? 'border-[#9d8189] bg-white shadow-sm ring-1 ring-[#9d8189]/10' : 'border-[#e8dfd8] bg-white/40 hover:bg-white'}
+                        ${selectedProfileId === p.id ? 'border-[#9d8189] bg-white shadow-sm' : 'border-[#e8dfd8] bg-white/40 hover:bg-white'}
                       `}
                     >
                       <div className="flex-1">
@@ -218,7 +215,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                 </div>
                 <div className="flex justify-center gap-6">
                   <button onClick={() => setStep(1)} className="text-[#8d7d6f] italic text-sm hover:underline">Back</button>
-                  <button onClick={() => setStep(3)} className="btn-warm px-8 py-2 rounded-full text-sm font-medium">Continue with Current Style</button>
+                  <button onClick={() => setStep(3)} className="btn-warm px-8 py-2 rounded-full text-sm font-medium">Continue</button>
                 </div>
               </div>
             )}
@@ -227,12 +224,12 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
               <div className="w-full max-w-2xl space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">Speak your truth</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Tell me what you want to say.</p>
+                  <p className="text-[#8d7d6f] text-sm italic">Words will flow onto the page as you speak.</p>
                 </div>
                 
-                <div className="w-full min-h-[160px] flex items-center justify-center p-8 bg-white/20 rounded-3xl border border-[#f0e4d7]">
+                <div className="w-full min-h-[160px] flex items-center justify-center p-8 bg-white/20 rounded-3xl border border-dashed border-[#f0e4d7]">
                   <p className={`text-3xl leading-relaxed text-[#5e503f] ${HANDWRITING_FONTS[selectedProfile.vibe]}`}>
-                    {transcription || <span className="text-[#e8dfd8] italic opacity-50">Words will appear as you speak...</span>}
+                    {transcription || <span className="text-[#e8dfd8] italic opacity-50">Speak now...</span>}
                   </p>
                 </div>
                 
@@ -243,35 +240,45 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                       ${isRecording ? 'bg-red-50 text-red-500 border border-red-200 ring-8 ring-red-500/5' : 'bg-[#9d8189] text-white'}
                     `}
                   >
-                    {isRecording ? (
-                      <div className="w-8 h-8 bg-red-500 rounded-sm" />
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                      </svg>
-                    )}
+                    {isRecording ? <div className="w-8 h-8 bg-red-500 rounded-sm" /> : <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>}
                   </button>
                   
                   <div className="flex gap-6 items-center">
                     <button onClick={() => setStep(2)} className="text-[#8d7d6f] italic text-sm hover:underline">Back</button>
                     {transcription && !isRecording && (
-                      <button 
-                        onClick={() => setStep(4)}
-                        className="btn-warm px-10 py-3 rounded-full text-lg font-medium shadow-lg"
-                      >
-                        Capture these words
-                      </button>
+                      <button onClick={() => setStep(4)} className="btn-warm px-10 py-3 rounded-full text-lg font-medium shadow-lg">Done Speaking</button>
                     )}
                   </div>
                 </div>
               </div>
             )}
 
+            {/* 新增的文字精炼步骤 */}
             {step === 4 && (
+              <div className="w-full max-w-2xl space-y-12 animate-fade-in">
+                <div className="space-y-2">
+                  <h2 className="text-4xl italic text-[#5e503f]">Polishing your thoughts</h2>
+                  <p className="text-[#8d7d6f] text-sm italic">Does this say exactly what you mean? Feel free to edit.</p>
+                </div>
+                
+                <textarea
+                  value={transcription}
+                  onChange={(e) => setTranscription(e.target.value)}
+                  className={`w-full min-h-[200px] p-8 rounded-3xl border border-[#e8dfd8] bg-white/50 text-3xl leading-relaxed text-[#5e503f] outline-none focus:border-[#9d8189] transition-all resize-none ${HANDWRITING_FONTS[selectedProfile.vibe]}`}
+                />
+                
+                <div className="flex justify-center gap-6">
+                  <button onClick={() => setStep(3)} className="text-[#8d7d6f] italic text-sm hover:underline">Back to Speaking</button>
+                  <button onClick={() => setStep(5)} className="btn-warm px-10 py-3 rounded-full text-lg font-medium shadow-lg">Looks Perfect</button>
+                </div>
+              </div>
+            )}
+
+            {step === 5 && (
               <div className="w-full max-w-lg space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">The color of the mood</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Choose a mood for the paper.</p>
+                  <p className="text-[#8d7d6f] text-sm italic">Choose an atmosphere for the paper.</p>
                 </div>
                 <div className="space-y-8">
                   <textarea
@@ -281,19 +288,14 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                     className="w-full h-40 p-8 rounded-3xl border border-[#e8dfd8] focus:border-[#9d8189] outline-none bg-white/50 text-xl italic text-[#5e503f] resize-none leading-relaxed"
                   />
                   <div className="flex flex-col gap-4">
-                    <button 
-                      onClick={() => setStep(5)} 
-                      className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform"
-                    >
-                      Next Step
-                    </button>
-                    <button onClick={() => setStep(3)} className="text-[#8d7d6f] italic text-sm hover:underline">Back to words</button>
+                    <button onClick={() => setStep(6)} className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Next Step</button>
+                    <button onClick={() => setStep(4)} className="text-[#8d7d6f] italic text-sm hover:underline">Back to words</button>
                   </div>
                 </div>
               </div>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <div className="w-full max-w-lg space-y-10 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">Final embellishments</h2>
@@ -304,50 +306,28 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                   {referenceImages.map((img) => (
                     <div key={img.id} className="relative w-24 h-24 rounded-lg overflow-hidden border border-[#e8dfd8] shadow-sm group">
                       <img src={img.data} className="w-full h-full object-cover" alt="Ref" />
-                      <button 
-                        onClick={() => removeReference(img.id)}
-                        className="absolute top-1 right-1 bg-white/80 text-[#9d8189] p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
+                      <button onClick={() => removeReference(img.id)} className="absolute top-1 right-1 bg-white/80 text-[#9d8189] p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                       </button>
                     </div>
                   ))}
                   {referenceImages.length < 3 && (
-                    <button 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-24 h-24 rounded-lg border-2 border-dashed border-[#e8dfd8] flex flex-col items-center justify-center text-[#8d7d6f] hover:border-[#9d8189] hover:text-[#9d8189] transition-all bg-white/20"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
+                    <button onClick={() => fileInputRef.current?.click()} className="w-24 h-24 rounded-lg border-2 border-dashed border-[#e8dfd8] flex flex-col items-center justify-center text-[#8d7d6f] hover:border-[#9d8189] hover:text-[#9d8189] transition-all bg-white/20">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                       <span className="text-[10px] uppercase tracking-tighter">Add sticker</span>
                     </button>
                   )}
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleFileChange} 
-                    className="hidden" 
-                    accept="image/*" 
-                    multiple 
-                  />
+                  <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
                 </div>
 
                 <div className="flex flex-col gap-4">
-                  <button 
-                    onClick={() => handleGenerate()} 
-                    className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform"
-                  >
-                    Breathe life into the page
-                  </button>
-                  <button onClick={() => setStep(4)} className="text-[#8d7d6f] italic text-sm hover:underline">Adjust the mood</button>
+                  <button onClick={() => handleGenerate()} className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Breathe life into the page</button>
+                  <button onClick={() => setStep(5)} className="text-[#8d7d6f] italic text-sm hover:underline">Adjust the mood</button>
                 </div>
               </div>
             )}
 
-            {step === 6 && (
+            {step === 7 && (
               <div className="w-full flex flex-col items-center animate-fade-in">
                 {isGenerating ? (
                   <div className="space-y-8">
@@ -358,17 +338,17 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                     </div>
                     <div className="space-y-2">
                       <h2 className="text-2xl italic text-[#5e503f]">Mixing the ink...</h2>
-                      <p className="text-[#8d7d6f] text-sm max-w-xs mx-auto">Our AI is hand-crafting your stationery. This might take a moment.</p>
+                      <p className="text-[#8d7d6f] text-sm max-w-xs mx-auto">Merging your words with artistic textures.</p>
                     </div>
                   </div>
                 ) : errorState ? (
                   <div className="space-y-8 max-w-md">
-                    <div className="text-4xl text-[#9d8189] opacity-40">☕</div>
+                    <div className="text-4xl">☕</div>
                     <h2 className="text-2xl italic text-[#5e503f]">The ink was a bit shy today.</h2>
-                    <p className="text-[#8d7d6f] text-sm">We couldn't quite capture the vision this time. Would you like to try again or use a simpler atmosphere?</p>
+                    <p className="text-[#8d7d6f] text-sm">We couldn't quite capture the vision this time.</p>
                     <div className="flex flex-col gap-4">
                       <button onClick={() => handleGenerate()} className="btn-warm px-8 py-3 rounded-full font-medium">Try again</button>
-                      <button onClick={() => setStep(4)} className="text-[#9d8189] italic text-sm hover:underline">Refine the mood</button>
+                      <button onClick={() => setStep(5)} className="text-[#9d8189] italic text-sm hover:underline">Refine the mood</button>
                     </div>
                   </div>
                 ) : (
@@ -380,27 +360,15 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                       {results.map((img, idx) => (
-                        <div 
-                          key={idx}
-                          onClick={() => setSelectedIndex(idx)}
-                          className={`cursor-pointer rounded-lg overflow-hidden transition-all duration-700 relative group
-                            ${selectedIndex === idx ? 'ring-4 ring-[#9d8189] shadow-2xl scale-[1.05] z-10' : 'opacity-40 hover:opacity-100 grayscale hover:grayscale-0 scale-95'}
-                          `}
-                        >
+                        <div key={idx} onClick={() => setSelectedIndex(idx)} className={`cursor-pointer rounded-lg overflow-hidden transition-all duration-700 relative group ${selectedIndex === idx ? 'ring-4 ring-[#9d8189] shadow-2xl scale-[1.05] z-10' : 'opacity-40 hover:opacity-100 grayscale hover:grayscale-0 scale-95'}`}>
                           <img src={img} alt={`Result ${idx + 1}`} className="w-full aspect-[3/4] object-cover" />
-                          <div className={`absolute inset-0 border-2 border-white/20 pointer-events-none`} />
                         </div>
                       ))}
                     </div>
 
                     <div className="flex flex-col items-center gap-6 pt-4">
-                      <button 
-                        onClick={handleFinalSave}
-                        className="btn-warm px-16 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform"
-                      >
-                        Keep this moment
-                      </button>
-                      <button onClick={() => setStep(4)} className="text-[#9d8189] italic text-sm hover:underline">Start over from mood</button>
+                      <button onClick={handleFinalSave} className="btn-warm px-16 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Keep this moment</button>
+                      <button onClick={() => setStep(5)} className="text-[#9d8189] italic text-sm hover:underline">Start over from mood</button>
                     </div>
                   </div>
                 )}
@@ -410,7 +378,6 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
           </div>
         </div>
         
-        {/* Subtle page shadows for notebook effect */}
         <div className="absolute -bottom-2 -right-2 w-full h-full bg-[#e8dfd8] rounded-xl -z-10 rotate-1 shadow-sm opacity-60" />
         <div className="absolute -bottom-4 -right-4 w-full h-full bg-[#f2ebe3] rounded-xl -z-20 rotate-2 shadow-sm opacity-40" />
       </div>
