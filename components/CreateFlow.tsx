@@ -53,7 +53,6 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
     if (isRecording) {
       recognitionRef.current?.stop();
       setIsRecording(false);
-      // Auto-refine punctuation
       if (transcription.trim().length > 3) {
         setIsRefining(true);
         const refined = await refineTranscriptPunctuation(transcription);
@@ -118,6 +117,16 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
     setTranscription(exampleText);
     setMoodPrompt(exampleMood);
     handleGenerate(exampleText, exampleMood);
+  };
+
+  const handleDownload = (imgUrl: string, index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = document.createElement('a');
+    link.href = imgUrl;
+    link.download = `LTMood-Variation-${index + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleFinalSave = () => {
@@ -230,7 +239,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
               <div className="w-full max-w-2xl space-y-8 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">Speak your truth</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Edit or speak. Your words appear instantly with refined grammar.</p>
+                  <p className="text-[#8d7d6f] text-sm italic">Edit or speak. Your chosen style will be preserved in the final work.</p>
                 </div>
                 
                 <div className="w-full min-h-[160px] relative">
@@ -278,7 +287,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
               <div className="w-full max-w-lg space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">The color of the mood</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Describe the atmosphere: paper, light, surroundings.</p>
+                  <p className="text-[#8d7d6f] text-sm italic">Describe the atmosphere: the paper's soul, the light, the silence.</p>
                 </div>
                 <div className="space-y-8">
                   <textarea
@@ -298,8 +307,8 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
             {step === 5 && (
               <div className="w-full max-w-lg space-y-10 animate-fade-in">
                 <div className="space-y-2">
-                  <h2 className="text-4xl italic text-[#5e503f]">Final embellishments</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Optionally add photos or stickers to inspire the AI.</p>
+                  <h2 className="text-4xl italic text-[#5e503f]">Physical Mementos</h2>
+                  <p className="text-[#8d7d6f] text-sm italic">Add images that will be fused into the stationery design.</p>
                 </div>
                 
                 <div className="flex flex-wrap justify-center gap-4 py-4">
@@ -314,14 +323,14 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                   {referenceImages.length < 3 && (
                     <button onClick={() => fileInputRef.current?.click()} className="w-24 h-24 rounded-lg border-2 border-dashed border-[#e8dfd8] flex flex-col items-center justify-center text-[#8d7d6f] hover:border-[#9d8189] hover:text-[#9d8189] transition-all bg-white/20">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                      <span className="text-[10px] uppercase tracking-tighter">Add sticker</span>
+                      <span className="text-[10px] uppercase tracking-tighter">Add detail</span>
                     </button>
                   )}
                   <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
                 </div>
 
                 <div className="flex flex-col gap-4">
-                  <button onClick={() => handleGenerate()} className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Invoke the Magic</button>
+                  <button onClick={() => handleGenerate()} className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Fuse & Create</button>
                   <button onClick={() => setStep(4)} className="text-[#8d7d6f] italic text-sm hover:underline">Adjust the mood</button>
                 </div>
               </div>
@@ -337,15 +346,15 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                         <div className="absolute inset-4 border-b-2 border-[#9d8189]/40 rounded-full animate-[spin_3s_linear_infinite]" />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-2xl italic text-[#5e503f]">Mixing the ink...</h2>
-                      <p className="text-[#8d7d6f] text-sm max-w-xs mx-auto">Our AI muse is crafting your variations. This takes a moment.</p>
+                      <h2 className="text-2xl italic text-[#5e503f]">Crafting your page...</h2>
+                      <p className="text-[#8d7d6f] text-sm max-w-xs mx-auto">AI is painting the background and fusing your handwritten thoughts.</p>
                     </div>
                   </div>
                 ) : errorState ? (
                   <div className="space-y-8 max-w-md">
                     <div className="text-4xl">🌫️</div>
-                    <h2 className="text-2xl italic text-[#5e503f]">The ink didn't flow correctly.</h2>
-                    <p className="text-[#8d7d6f] text-sm">We couldn't quite render your vision. Try a simpler mood or check your connection.</p>
+                    <h2 className="text-2xl italic text-[#5e503f]">The vision was blurred.</h2>
+                    <p className="text-[#8d7d6f] text-sm">We encountered a small storm in the creative flow. Try again or simplify your mood.</p>
                     <div className="flex flex-col gap-4">
                       <button onClick={() => handleGenerate()} className="btn-warm px-8 py-3 rounded-full font-medium shadow-md">Try again</button>
                       <button onClick={() => setStep(4)} className="text-[#9d8189] italic text-sm hover:underline">Refine the mood</button>
@@ -354,14 +363,29 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                 ) : (
                   <div className="w-full space-y-12">
                     <div className="space-y-2">
-                      <h2 className="text-4xl italic text-[#5e503f]">Behold the work</h2>
-                      <p className="text-[#8d7d6f] text-sm italic">Select the page that captures your heart.</p>
+                      <h2 className="text-4xl italic text-[#5e503f]">Final Composition</h2>
+                      <p className="text-[#8d7d6f] text-sm italic">Each variation has preserved your chosen script perfectly.</p>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                       {results.map((img, idx) => (
-                        <div key={idx} onClick={() => setSelectedIndex(idx)} className={`cursor-pointer rounded-lg overflow-hidden transition-all duration-700 relative group ${selectedIndex === idx ? 'ring-4 ring-[#9d8189] shadow-2xl scale-[1.05] z-10' : 'opacity-40 hover:opacity-100 grayscale hover:grayscale-0 scale-95'}`}>
+                        <div 
+                          key={idx} 
+                          onClick={() => setSelectedIndex(idx)} 
+                          className={`group cursor-pointer rounded-lg overflow-hidden transition-all duration-700 relative 
+                            ${selectedIndex === idx ? 'ring-4 ring-[#9d8189] shadow-2xl scale-[1.05] z-10' : 'opacity-40 hover:opacity-100 grayscale hover:grayscale-0 scale-95'}
+                          `}
+                        >
                           <img src={img} alt={`Result ${idx + 1}`} className="w-full aspect-[3/4] object-cover shadow-sm" />
+                          <button 
+                            onClick={(e) => handleDownload(img, idx, e)}
+                            className="absolute top-2 right-2 bg-white/90 hover:bg-white text-[#9d8189] p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0"
+                            title="Download this variation"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          </button>
                         </div>
                       ))}
                     </div>

@@ -1,5 +1,5 @@
 
-export type HandwritingVibe = 'elegant' | 'classic' | 'bubbly' | 'sketchy' | 'raw' | 'fancy' | 'clean';
+export type HandwritingVibe = 'elegant' | 'vintage' | 'bubbly' | 'messy' | 'clean';
 
 export interface HandwritingProfile {
   id: string;
@@ -19,10 +19,6 @@ export interface ArchiveEntry {
   imageUrl: string;
   thumbnailUrl: string;
   timestamp: number;
-}
-
-export interface GenerationResult {
-  imageUrl: string;
 }
 
 export interface ReferenceImage {
