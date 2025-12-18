@@ -15,7 +15,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
   const [selectedProfileId, setSelectedProfileId] = useState(profiles.find(p => p.isDefault)?.id || profiles[0]?.id);
   const [transcription, setTranscription] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [isRefiningPunctuation, setIsRefiningPunctuation] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
   const [moodPrompt, setMoodPrompt] = useState('');
   const [referenceImages, setReferenceImages] = useState<ReferenceImage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -53,12 +53,12 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
     if (isRecording) {
       recognitionRef.current?.stop();
       setIsRecording(false);
-      // Automatically refine punctuation once recording stops
-      if (transcription.length > 5) {
-        setIsRefiningPunctuation(true);
+      // Auto-refine punctuation
+      if (transcription.trim().length > 3) {
+        setIsRefining(true);
         const refined = await refineTranscriptPunctuation(transcription);
         setTranscription(refined);
-        setIsRefiningPunctuation(false);
+        setIsRefining(false);
       }
     } else {
       recognitionRef.current?.start();
@@ -112,7 +112,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
   };
 
   const tryExample = () => {
-    const exampleText = "My dearest friend, just a small note to say I am thinking of you. The weather here is turning cool, and the leaves are beginning to dance in the wind.";
+    const exampleText = "My dearest friend, just a small note to say I am thinking of you. The weather here is turning cool, and the leaves are beginning to dance in the wind. I hope you are well.";
     const exampleMood = "Warm vintage paper, light coffee stains, delicate autumn leaf illustrations.";
     setTemplate('Letter');
     setTranscription(exampleText);
@@ -136,7 +136,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
   };
 
   const stepsList = [
-    { label: 'Template' },
+    { label: 'Form' },
     { label: 'Style' },
     { label: 'Speak' },
     { label: 'Mood' },
@@ -230,19 +230,25 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
               <div className="w-full max-w-2xl space-y-8 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">Speak your truth</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Edit or speak. Your words appear instantly.</p>
+                  <p className="text-[#8d7d6f] text-sm italic">Edit or speak. Your words appear instantly with refined grammar.</p>
                 </div>
                 
                 <div className="w-full min-h-[160px] relative">
                   <textarea
                     value={transcription}
                     onChange={(e) => setTranscription(e.target.value)}
-                    placeholder={isRecording ? "Listening..." : "Speak now or type here..."}
-                    className={`w-full min-h-[200px] p-8 rounded-3xl border ${isRecording ? 'border-red-300' : 'border-dashed border-[#f0e4d7]'} bg-white/20 text-3xl leading-relaxed text-[#5e503f] outline-none focus:border-[#9d8189] transition-all resize-none ${HANDWRITING_FONTS[selectedProfile.vibe]}`}
+                    placeholder={isRecording ? "Listening closely..." : "Speak now or type your thoughts here..."}
+                    className={`w-full min-h-[220px] p-8 rounded-3xl border ${isRecording ? 'border-red-300 ring-2 ring-red-100' : 'border-dashed border-[#f0e4d7]'} bg-white/20 text-3xl leading-relaxed text-[#5e503f] outline-none focus:border-[#9d8189] transition-all resize-none ${HANDWRITING_FONTS[selectedProfile.vibe]}`}
                   />
-                  {isRefiningPunctuation && (
-                    <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] rounded-3xl flex items-center justify-center">
-                       <span className="text-[#9d8189] italic text-lg animate-pulse">Polishing your grammar...</span>
+                  {isRefining && (
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] rounded-3xl flex items-center justify-center animate-pulse">
+                      <div className="flex flex-col items-center gap-2">
+                        <svg className="animate-spin h-6 w-6 text-[#9d8189]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span className="text-[#9d8189] italic font-medium">Polishing punctuation...</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -250,7 +256,8 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                 <div className="flex flex-col items-center gap-8">
                   <button
                     onClick={handleRecordToggle}
-                    className={`w-24 h-24 rounded-full flex items-center justify-center transition-all transform hover:scale-105 shadow-xl
+                    disabled={isRefining}
+                    className={`w-24 h-24 rounded-full flex items-center justify-center transition-all transform hover:scale-105 shadow-xl disabled:opacity-50
                       ${isRecording ? 'bg-red-50 text-red-500 border border-red-200 ring-8 ring-red-500/5' : 'bg-[#9d8189] text-white'}
                     `}
                   >
@@ -259,8 +266,8 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                   
                   <div className="flex gap-6 items-center">
                     <button onClick={() => setStep(2)} className="text-[#8d7d6f] italic text-sm hover:underline">Back</button>
-                    {transcription.length > 0 && !isRecording && (
-                      <button onClick={() => setStep(4)} className="btn-warm px-10 py-3 rounded-full text-lg font-medium shadow-lg">Next: Atmosphere</button>
+                    {transcription.trim().length > 0 && !isRecording && !isRefining && (
+                      <button onClick={() => setStep(4)} className="btn-warm px-10 py-3 rounded-full text-lg font-medium shadow-lg">Confirm Words</button>
                     )}
                   </div>
                 </div>
@@ -271,18 +278,18 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
               <div className="w-full max-w-lg space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">The color of the mood</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Describe the world surrounding your letter.</p>
+                  <p className="text-[#8d7d6f] text-sm italic">Describe the atmosphere: paper, light, surroundings.</p>
                 </div>
                 <div className="space-y-8">
                   <textarea
                     value={moodPrompt}
                     onChange={(e) => setMoodPrompt(e.target.value)}
-                    placeholder="e.g. vintage paper, pressed flowers, soft morning light..."
+                    placeholder="e.g. sepia paper with pressed lavender, warm morning light through a window, ink stains..."
                     className="w-full h-40 p-8 rounded-3xl border border-[#e8dfd8] focus:border-[#9d8189] outline-none bg-white/50 text-xl italic text-[#5e503f] resize-none leading-relaxed"
                   />
                   <div className="flex flex-col gap-4">
                     <button onClick={() => setStep(5)} className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Next Step</button>
-                    <button onClick={() => setStep(3)} className="text-[#8d7d6f] italic text-sm hover:underline">Refine your words</button>
+                    <button onClick={() => setStep(3)} className="text-[#8d7d6f] italic text-sm hover:underline">Edit words</button>
                   </div>
                 </div>
               </div>
@@ -292,7 +299,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
               <div className="w-full max-w-lg space-y-10 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-4xl italic text-[#5e503f]">Final embellishments</h2>
-                  <p className="text-[#8d7d6f] text-sm italic">Optionally add images to guide the AI's eye.</p>
+                  <p className="text-[#8d7d6f] text-sm italic">Optionally add photos or stickers to inspire the AI.</p>
                 </div>
                 
                 <div className="flex flex-wrap justify-center gap-4 py-4">
@@ -314,7 +321,7 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                  <button onClick={() => handleGenerate()} className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Invoke the Muse</button>
+                  <button onClick={() => handleGenerate()} className="btn-warm px-12 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Invoke the Magic</button>
                   <button onClick={() => setStep(4)} className="text-[#8d7d6f] italic text-sm hover:underline">Adjust the mood</button>
                 </div>
               </div>
@@ -330,38 +337,38 @@ const CreateFlow: React.FC<CreateFlowProps> = ({ profiles, onSave }) => {
                         <div className="absolute inset-4 border-b-2 border-[#9d8189]/40 rounded-full animate-[spin_3s_linear_infinite]" />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-2xl italic text-[#5e503f]">Brewing the ink...</h2>
-                      <p className="text-[#8d7d6f] text-sm max-w-xs mx-auto">This takes a little longer to get the details perfect.</p>
+                      <h2 className="text-2xl italic text-[#5e503f]">Mixing the ink...</h2>
+                      <p className="text-[#8d7d6f] text-sm max-w-xs mx-auto">Our AI muse is crafting your variations. This takes a moment.</p>
                     </div>
                   </div>
                 ) : errorState ? (
                   <div className="space-y-8 max-w-md">
-                    <div className="text-4xl">🕊️</div>
-                    <h2 className="text-2xl italic text-[#5e503f]">The vision was unclear.</h2>
-                    <p className="text-[#8d7d6f] text-sm">We couldn't quite render the page this time. Try a simpler mood or retry.</p>
+                    <div className="text-4xl">🌫️</div>
+                    <h2 className="text-2xl italic text-[#5e503f]">The ink didn't flow correctly.</h2>
+                    <p className="text-[#8d7d6f] text-sm">We couldn't quite render your vision. Try a simpler mood or check your connection.</p>
                     <div className="flex flex-col gap-4">
                       <button onClick={() => handleGenerate()} className="btn-warm px-8 py-3 rounded-full font-medium shadow-md">Try again</button>
-                      <button onClick={() => setStep(4)} className="text-[#9d8189] italic text-sm hover:underline">Go back to Mood</button>
+                      <button onClick={() => setStep(4)} className="text-[#9d8189] italic text-sm hover:underline">Refine the mood</button>
                     </div>
                   </div>
                 ) : (
                   <div className="w-full space-y-12">
                     <div className="space-y-2">
                       <h2 className="text-4xl italic text-[#5e503f]">Behold the work</h2>
-                      <p className="text-[#8d7d6f] text-sm italic">The stationery is ready for your vault.</p>
+                      <p className="text-[#8d7d6f] text-sm italic">Select the page that captures your heart.</p>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                       {results.map((img, idx) => (
                         <div key={idx} onClick={() => setSelectedIndex(idx)} className={`cursor-pointer rounded-lg overflow-hidden transition-all duration-700 relative group ${selectedIndex === idx ? 'ring-4 ring-[#9d8189] shadow-2xl scale-[1.05] z-10' : 'opacity-40 hover:opacity-100 grayscale hover:grayscale-0 scale-95'}`}>
-                          <img src={img} alt={`Result ${idx + 1}`} className="w-full aspect-[3/4] object-cover" />
+                          <img src={img} alt={`Result ${idx + 1}`} className="w-full aspect-[3/4] object-cover shadow-sm" />
                         </div>
                       ))}
                     </div>
 
                     <div className="flex flex-col items-center gap-6 pt-4">
-                      <button onClick={handleFinalSave} className="btn-warm px-16 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Keep this page</button>
-                      <button onClick={() => setStep(4)} className="text-[#9d8189] italic text-sm hover:underline">Start over from mood</button>
+                      <button onClick={handleFinalSave} className="btn-warm px-16 py-4 rounded-full text-xl shadow-xl hover:scale-105 transition-transform">Save to Vault</button>
+                      <button onClick={() => setStep(4)} className="text-[#9d8189] italic text-sm hover:underline">Change atmosphere</button>
                     </div>
                   </div>
                 )}

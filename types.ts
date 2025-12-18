@@ -1,5 +1,5 @@
 
-export type HandwritingVibe = 'elegant' | 'classic' | 'bubbly' | 'sketchy' | 'raw' | 'fancy' | 'bold' | 'clean';
+export type HandwritingVibe = 'elegant' | 'classic' | 'bubbly' | 'sketchy' | 'raw' | 'fancy' | 'clean';
 
 export interface HandwritingProfile {
   id: string;

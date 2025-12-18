@@ -8,22 +8,20 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
  * Uses Gemini to add punctuation and capitalization to raw speech transcripts.
  */
 export const refineTranscriptPunctuation = async (rawText: string): Promise<string> => {
-  if (!rawText || rawText.length < 5) return rawText;
+  if (!rawText || rawText.trim().length < 3) return rawText;
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `You are an expert editor for a personal journal app. 
-      Please take the following raw speech-to-text input and add natural punctuation (periods, commas, etc.) and proper capitalization. 
-      DO NOT change the words. Keep the tone intimate and personal.
+      contents: `You are a sensitive journal editor. Please take this raw speech transcript and add correct punctuation and capitalization to make it readable and evocative. DO NOT add or remove words. 
       
-      Input: "${rawText}"`,
+      Transcript: "${rawText}"`,
       config: {
         thinkingConfig: { thinkingBudget: 0 }
       }
     });
     return response.text?.trim() || rawText;
   } catch (err) {
-    console.warn("Failed to refine punctuation, using raw text.");
+    console.warn("Punctuation refinement failed:", err);
     return rawText;
   }
 };
@@ -36,19 +34,21 @@ export const generateStationeryVariation = async (
   referenceImages: ReferenceImage[] = [],
   seedOffset: number = 0
 ): Promise<string | null> => {
-  // Enhanced prompt for better "fusing" and instruction adherence.
-  const prompt = `Task: Create a piece of fine stationery art for a "${template}".
-  Visual Style/Mood: "${mood}". 
-  Handwriting Style: ${vibe}.
-
-  CRITICAL INSTRUCTION:
-  1. You MUST visually render the following text onto the paper in a ${vibe} handwriting style: "${text}".
-  2. The text should look like it was physically written with a pen on the page, integrating with shadows and paper texture.
-  3. Ensure all background elements (drawings, doodles, textures) from the mood description are clearly present but do not obscure the text.
-  4. The output must be a single clean image of the paper, no digital borders or UI.
-  5. Use artistic flair to make it look like a high-quality physical journal entry.
+  // Enhanced prompt to force adherence to specific mood details and text placement
+  const prompt = `Task: Generate a single, beautiful image of a "${template}" stationery page.
   
-  Variation ID: ${Date.now() + seedOffset}`;
+  Visual Theme: "${mood}".
+  Handwriting Tone: ${vibe}.
+  
+  MANDATORY REQUIREMENT:
+  You must VISUALLY WRITE the following text onto the stationery in a realistic ${vibe} handwriting style. The text should look like it's written with ink on physical paper:
+  
+  "${text}"
+  
+  The artwork should capture every detail of the atmosphere described: "${mood}". 
+  Ensure high artistic quality, realistic textures, and proper integration of any sketches or stickers mentioned.
+  Do not show any hands, tools, or digital UI. Only the final paper page.
+  Variation: ${seedOffset}`;
 
   const parts: any[] = [{ text: prompt }];
   
@@ -81,7 +81,7 @@ export const generateStationeryVariation = async (
     }
     return null;
   } catch (error) {
-    console.error("Variation generation failed:", error);
+    console.error("Generation failed:", error);
     return null;
   }
 };
@@ -101,7 +101,7 @@ export const generateStationery = async (
   const validImages = results.filter((img): img is string => img !== null);
   
   if (validImages.length === 0) {
-    throw new Error("No variations could be generated.");
+    throw new Error("Generation failed to produce any results.");
   }
   
   return validImages;
