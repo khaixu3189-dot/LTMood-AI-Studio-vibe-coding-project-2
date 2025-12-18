@@ -1,0 +1,7 @@
+{
+  "name": "LTMood - Artsy Voice Journal",
+  "description": "A warm, journal-like app that transforms your spoken words into beautiful handwritten stationery using Gemini AI.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

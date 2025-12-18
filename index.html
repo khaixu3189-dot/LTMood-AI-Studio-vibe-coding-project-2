@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTMood</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Dancing+Script:wght@400..700&family=Indie+Flower&family=Nothing+You+Could+Do&family=Shadows+Into+Light&family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper-color: #fdfaf6;
+            --desk-color: #f2ebe3;
+        }
+        body {
+            font-family: 'EB Garamond', serif;
+            background-color: var(--desk-color);
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%),
+                url("https://www.transparenttextures.com/patterns/linen.png");
+            color: #4a3f35;
+            overflow-x: hidden;
+        }
+        .handwriting-neat { font-family: 'Caveat', cursive; }
+        .handwriting-casual { font-family: 'Shadows Into Light', cursive; }
+        .handwriting-messy { font-family: 'Nothing You Could Do', cursive; }
+        .handwriting-cute { font-family: 'Indie Flower', cursive; }
+        
+        .paper-sheet {
+            background-color: var(--paper-color);
+            background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png");
+            box-shadow: 
+                0 10px 30px -10px rgba(0,0,0,0.1),
+                0 1px 2px rgba(0,0,0,0.05),
+                inset 0 0 100px rgba(255,255,255,0.5);
+            position: relative;
+        }
+
+        .paper-sheet::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; left: 0;
+            width: 40px;
+            background: linear-gradient(to right, rgba(0,0,0,0.03), transparent);
+            pointer-events: none;
+        }
+        
+        @keyframes subtle-fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: subtle-fade-in 0.8s ease-out forwards; }
+        
+        .btn-warm {
+            background-color: #9d8189;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-warm:hover {
+            background-color: #8b6f77;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(157, 129, 137, 0.3);
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
